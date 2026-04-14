@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>לוח תשלומים — נוף ים, נאות פרס</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    h1 { font-size: 1.6rem; color: #f8fafc; margin-bottom: 0.25rem; }
+    .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+    h2 { font-size: 1.1rem; color: #cbd5e1; margin: 2rem 0 0.75rem; border-bottom: 1px solid #1e293b; padding-bottom: 0.4rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin-bottom: 1.5rem;
+    }
+    th {
+      background: #1e293b;
+      color: #94a3b8;
+      text-align: right;
+      padding: 0.6rem 0.8rem;
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    td {
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid #1e293b;
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #1e293b55; }
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-green { background: #14532d55; color: #86efac; border: 1px solid #16a34a44; }
+    .badge-yellow { background: #78350f55; color: #fcd34d; border: 1px solid #d9770644; }
+    .badge-red { background: #7f1d1d55; color: #fca5a5; border: 1px solid #dc262644; }
+    .badge-gray { background: #1e293b; color: #94a3b8; border: 1px solid #33415544; }
+    .pct { font-weight: 700; color: #f8fafc; }
+    .date { color: #7dd3fc; font-variant-numeric: tabular-nums; }
+    .label-id { color: #94a3b8; font-size: 0.8rem; }
+    .total-row td { background: #1e293b; font-weight: 700; color: #f8fafc; }
+    .note-box {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+    }
+    .note-box strong { color: #fcd34d; }
+    .note-box ul { margin: 0.5rem 0 0 1.25rem; }
+    .note-box li { margin-bottom: 0.35rem; color: #cbd5e1; }
+    .source-tag {
+      display: inline-block;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 4px;
+      padding: 0.1rem 0.5rem;
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-bottom: 1.5rem;
+    }
+    .section-divider { margin: 2.5rem 0; border: none; border-top: 1px solid #1e293b; }
+    .amount { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .amount-idx { font-variant-numeric: tabular-nums; white-space: nowrap; color: #fbbf24; }
+    .amount-final { font-variant-numeric: tabular-nums; white-space: nowrap; color: #34d399; font-weight: 700; }
+    .idx-zero { color: #475569; }
+    .scenario-selector { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .scenario-selector-label { color: #64748b; font-size: 0.85rem; white-space: nowrap; }
+    .scenario-btn {
+      padding: 0.45rem 1.1rem; border-radius: 6px; border: 1px solid #334155;
+      background: #1e293b; color: #94a3b8; cursor: pointer; font-size: 0.85rem;
+      font-family: inherit; transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .scenario-btn:hover { border-color: #475569; color: #e2e8f0; }
+    .scenario-btn.low.active  { background: #14532d55; color: #86efac; border-color: #16a34a; font-weight: 700; }
+    .scenario-btn.mid.active  { background: #78350f55; color: #fcd34d; border-color: #d97706; font-weight: 700; }
+    .scenario-btn.high.active { background: #7f1d1d55; color: #fca5a5; border-color: #dc2626; font-weight: 700; }
+    .idx-pct-cell { color: #a78bfa; font-variant-numeric: tabular-nums; font-size: 0.83rem; white-space: nowrap; }
+    .active-scenario-row td { background: #1e2d3d !important; outline: 1px solid #334155; }
+    .mode-selector { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+    .mode-selector-label { color: #64748b; font-size: 0.85rem; white-space: nowrap; }
+    .mode-btn {
+      padding: 0.45rem 1.1rem; border-radius: 6px; border: 1px solid #334155;
+      background: #1e293b; color: #94a3b8; cursor: pointer; font-size: 0.85rem;
+      font-family: inherit; transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .mode-btn:hover { border-color: #475569; color: #e2e8f0; }
+    .mode-btn.active { background: #0f172a; color: #7dd3fc; border-color: #0284c7; font-weight: 700; }
+    .mode-btn.bulk.active { background: #1a1040; color: #c4b5fd; border-color: #7c3aed; font-weight: 700; }
+    #bulk-section { display: none; }
+    .bulk-note { color: #64748b; font-size: 0.8rem; margin-bottom: 1.5rem; padding: 0.6rem 1rem; border-right: 2px solid #7c3aed; background: #1a1040; border-radius: 0 6px 6px 0; }
+    .bulk-note strong { color: #c4b5fd; }
+    .bulk-highlight td { background: #1a1040; }
+    .compare-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 0.85rem 1.25rem; margin-bottom: 1.5rem; font-size: 0.83rem; color: #94a3b8; }
+    .compare-box strong { color: #e2e8f0; }
+    /* Price input */
+    .price-input-box {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .price-input-label { color: #94a3b8; font-size: 0.9rem; white-space: nowrap; font-weight: 600; }
+    .price-input-wrap {
+      display: flex;
+      align-items: center;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      padding: 0 0.75rem;
+      transition: border-color 0.15s;
+    }
+    .price-input-wrap:focus-within { border-color: #7dd3fc; }
+    .price-sym { color: #64748b; font-size: 1rem; padding-left: 0.25rem; }
+    #price-input {
+      background: transparent;
+      border: none;
+      color: #f8fafc;
+      font-size: 1.15rem;
+      font-weight: 700;
+      padding: 0.5rem 0.4rem;
+      width: 12ch;
+      font-variant-numeric: tabular-nums;
+      direction: ltr;
+      text-align: left;
+      outline: none;
+      font-family: inherit;
+    }
+    #price-input::-webkit-outer-spin-button,
+    #price-input::-webkit-inner-spin-button { -webkit-appearance: none; appearance: none; }
+    #price-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+    .price-upfront { color: #64748b; font-size: 0.85rem; white-space: nowrap; }
+    .price-upfront strong { color: #7dd3fc; font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+
+  <h1>לוח תשלומים — נוף ים, נאות פרס, חיפה</h1>
+  <p class="subtitle">מקור: נספח א׳ לחוזה המכר — "פרטי הדירה, המחיר ותנאי התשלום (הצמדה למדד תשומות הבנייה)"</p>
+  <span class="source-tag">05 - Appendices Signed.pdf · עמ׳ 2–4</span>
+
+  <div class="price-input-box">
+    <span class="price-input-label">מחיר הדירה:</span>
+    <div class="price-input-wrap">
+      <span class="price-sym">₪</span>
+      <input type="number" id="price-input"
+             value="1111122" min="100000" max="10000000" step="1000"
+             oninput="handlePriceInput(this.value)" />
+    </div>
+    <span class="price-upfront">90% בחתימה: <strong id="upfront-display">₪1,000,010</strong> (10% נותרים משולמים בקבלת מפתח)</span>
+  </div>
+
+  <div class="note-box">
+    <strong>הנחות לחישוב תאריכים:</strong>
+    <ul>
+      <li>תאריך חתימה: <strong>13.04.2026</strong></li>
+      <li>תאריך מסירה חוזי: <strong>28.09.2028</strong></li>
+      <li>כל התשלומים מחושבים לפי חודשים מתאריך החתימה (לא לפי אבני דרך בנייה)</li>
+    </ul>
+  </div>
+
+  <h2>לוח תשלומים — נספח א׳</h2>
+
+  <div class="note-box">
+    <strong>מתודולוגיית הערכת הצמדה:</strong>
+    <ul>
+      <li>נתון היסטורי: ממוצע שנתי 2005–2025 = <strong>2.8%/שנה</strong> | ממוצע 10 שנים (2016–2025) = <strong>2.7%/שנה</strong></li>
+      <li><strong>גורמי לחץ מלחמה:</strong> שכר בנייה +10% ב-2024–2025; בטון +25% מאמצע 2024; ברזל +35% מאמצע 2024; מחסור מבני בעובדים פלסטינים — עובדים זרים יקרים יותר; לחץ ביקוש עצום לשיקום ותשתיות</li>
+      <li>הצמדה חלה על <strong>50% בלבד</strong> מתשלומים ג.א–ג.ה ועל 50% מתשלום ז; תשלום ז כולל גם צבירת הפרשי הצמדה מכל תשלומי ג</li>
+      <li>עמודת <strong>% מדד</strong> = צמיחת המדד המצטברת מיום החתימה ועד מועד התשלום (חלה על 50% הצמוד בלבד)</li>
+    </ul>
+  </div>
+
+  <div class="mode-selector">
+    <span class="mode-selector-label">מבנה תשלום:</span>
+    <button class="mode-btn active"      onclick="setMode('regular')">לוח רגיל — 7 תשלומים</button>
+    <button class="mode-btn bulk"        onclick="setMode('bulk')">תשלום מוקדם — 90% בחתימה ✦ בכפוף לאישור קבלן</button>
+  </div>
+
+  <div class="scenario-selector">
+    <span class="scenario-selector-label">תרחיש מדד:</span>
+    <button class="scenario-btn low"  data-rate="0.03"  onclick="setScenario(this)">שמרני — 3.0%/שנה</button>
+    <button class="scenario-btn mid active" data-rate="0.045" onclick="setScenario(this)">בסיס — 4.5%/שנה</button>
+    <button class="scenario-btn high" data-rate="0.07"  onclick="setScenario(this)">לחץ מלחמה — 7.0%/שנה</button>
+  </div>
+
+  <table id="payment-table">
+    <thead>
+      <tr>
+        <th>סעיף</th>
+        <th>תיאור</th>
+        <th>מועד</th>
+        <th>תאריך מוערך</th>
+        <th>%</th>
+        <th>הצמדה למדד</th>
+        <th>% מדד</th>
+        <th>סכום בסיס</th>
+        <th>הצמדה משוערת</th>
+        <th>סכום סופי משוער</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="label-id">א</span></td>
+        <td>חתימה על החוזה</td>
+        <td>במעמד החתימה (שיק)</td>
+        <td><span class="date">13.04.2026</span></td>
+        <td><span class="pct">7%</span></td>
+        <td><span class="badge badge-green">ללא הצמדה</span></td>
+        <td class="idx-zero">—</td>
+        <td class="amount" id="base-a">₪77,779</td>
+        <td class="idx-zero">—</td>
+        <td class="amount-final" id="fin-a">₪77,779</td>
+      </tr>
+      <tr>
+        <td><span class="label-id">ב</span></td>
+        <td>השלמה ל-20% מהתמורה</td>
+        <td>תוך 45 יום מהחתימה</td>
+        <td><span class="date">28.05.2026</span></td>
+        <td><span class="pct">13%</span></td>
+        <td><span class="badge badge-green">ללא הצמדה</span></td>
+        <td class="idx-zero">—</td>
+        <td class="amount" id="base-b">₪144,446</td>
+        <td class="idx-zero">—</td>
+        <td class="amount-final" id="fin-b">₪144,446</td>
+      </tr>
+      <tr data-row-type="g" data-months="4">
+        <td><span class="label-id">ג.א</span></td>
+        <td>תשלום 1 מתוך 5</td>
+        <td>חודש 4 מהחתימה</td>
+        <td><span class="date">13.08.2026</span></td>
+        <td><span class="pct">14%</span></td>
+        <td><span class="badge badge-yellow">50% מוצמד</span></td>
+        <td class="idx-pct-cell" id="pct-g1"></td>
+        <td class="amount" id="base-g1">₪155,557</td>
+        <td class="amount-idx" id="idx-g1"></td>
+        <td class="amount-final" id="fin-g1"></td>
+      </tr>
+      <tr data-row-type="g" data-months="9">
+        <td><span class="label-id">ג.ב</span></td>
+        <td>תשלום 2 מתוך 5</td>
+        <td>חודש 9 מהחתימה</td>
+        <td><span class="date">13.01.2027</span></td>
+        <td><span class="pct">14%</span></td>
+        <td><span class="badge badge-yellow">50% מוצמד</span></td>
+        <td class="idx-pct-cell" id="pct-g2"></td>
+        <td class="amount" id="base-g2">₪155,557</td>
+        <td class="amount-idx" id="idx-g2"></td>
+        <td class="amount-final" id="fin-g2"></td>
+      </tr>
+      <tr data-row-type="g" data-months="14">
+        <td><span class="label-id">ג.ג</span></td>
+        <td>תשלום 3 מתוך 5</td>
+        <td>חודש 14 מהחתימה</td>
+        <td><span class="date">13.06.2027</span></td>
+        <td><span class="pct">14%</span></td>
+        <td><span class="badge badge-yellow">50% מוצמד</span></td>
+        <td class="idx-pct-cell" id="pct-g3"></td>
+        <td class="amount" id="base-g3">₪155,557</td>
+        <td class="amount-idx" id="idx-g3"></td>
+        <td class="amount-final" id="fin-g3"></td>
+      </tr>
+      <tr data-row-type="g" data-months="19">
+        <td><span class="label-id">ג.ד</span></td>
+        <td>תשלום 4 מתוך 5</td>
+        <td>חודש 19 מהחתימה</td>
+        <td><span class="date">13.11.2027</span></td>
+        <td><span class="pct">14%</span></td>
+        <td><span class="badge badge-yellow">50% מוצמד</span></td>
+        <td class="idx-pct-cell" id="pct-g4"></td>
+        <td class="amount" id="base-g4">₪155,557</td>
+        <td class="amount-idx" id="idx-g4"></td>
+        <td class="amount-final" id="fin-g4"></td>
+      </tr>
+      <tr data-row-type="g" data-months="24">
+        <td><span class="label-id">ג.ה</span></td>
+        <td>תשלום 5 מתוך 5</td>
+        <td>חודש 24 מהחתימה</td>
+        <td><span class="date">13.04.2028</span></td>
+        <td><span class="pct">14%</span></td>
+        <td><span class="badge badge-yellow">50% מוצמד</span></td>
+        <td class="idx-pct-cell" id="pct-g5"></td>
+        <td class="amount" id="base-g5">₪155,557</td>
+        <td class="amount-idx" id="idx-g5"></td>
+        <td class="amount-final" id="fin-g5"></td>
+      </tr>
+      <tr data-row-type="z">
+        <td><span class="label-id">ז</span></td>
+        <td>יתרת התמורה — לפני מסירה</td>
+        <td>14 יום לפני מועד המסירה</td>
+        <td><span class="date">14.09.2028</span></td>
+        <td><span class="pct">10%</span></td>
+        <td><span class="badge badge-red">50% מוצמד + כל הפרשי הצמדה שנצברו</span></td>
+        <td class="idx-pct-cell" id="pct-z"></td>
+        <td class="amount" id="base-z">₪111,112</td>
+        <td class="amount-idx" id="idx-z"></td>
+        <td class="amount-final" id="fin-z"></td>
+      </tr>
+      <tr class="total-row">
+        <td colspan="4">סה"כ</td>
+        <td><span class="pct">100%</span></td>
+        <td></td>
+        <td></td>
+        <td class="amount" id="base-total">₪1,111,122</td>
+        <td class="amount-idx" id="total-idx"></td>
+        <td class="amount-final" id="total-fin"></td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="footnote-z" style="color:#475569; font-size:0.78rem; margin-bottom:1.5rem;"></p>
+
+  <!-- Bulk payment section (hidden by default) -->
+  <div id="bulk-section">
+    <div class="bulk-note">
+      <strong>תשלום מוקדם — 90% בחתימה:</strong>
+      כל תשלומי ג.א–ג.ה משולמים במעמד החתימה במחיר הבסיס — ללא כל הצמדה, שכן אין עלייה במדד ביום התשלום.
+      מכיוון שהמוכר <strong>קיבל כבר את מלוא הכסף</strong> עבור תשלומי ג, <strong>אין בסיס חוקי לגביית "הפרשי הצמדה" עליהם בתשלום ז׳</strong> — אותם הפרשים נועדו לפצות על כסף שטרם התקבל.
+      תשלום ז׳ כולל הצמדה על <strong>50% מתשלום ז׳ בלבד</strong> (הסכום היחיד שעדיין לא שולם). <strong>התוצאה: חיסכון משמעותי ביחס ללוח הרגיל.</strong>
+    </div>
+    <div class="compare-box" id="bulk-compare"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>סעיף</th><th>תיאור</th><th>מועד</th><th>תאריך</th>
+          <th>%</th><th>הצמדה למדד</th><th>% מדד</th>
+          <th>סכום בסיס</th><th>הצמדה משוערת</th><th>סכום סופי משוער</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="bulk-highlight">
+          <td><span class="label-id">א–ג.ה</span></td>
+          <td>תשלום מוקדם (א׳+ב׳+ג.א–ג.ה)</td>
+          <td>במעמד החתימה</td>
+          <td><span class="date">13.04.2026</span></td>
+          <td><span class="pct">90%</span></td>
+          <td><span class="badge badge-green">ללא הצמדה</span></td>
+          <td class="idx-zero">—</td>
+          <td class="amount" id="bulk-base">₪1,000,010</td>
+          <td class="idx-zero">—</td>
+          <td class="amount-final" id="bulk-fin-upfront">₪1,000,010</td>
+        </tr>
+        <tr>
+          <td><span class="label-id">ז</span></td>
+          <td>יתרת התמורה + כל ההצמדה שנצברה</td>
+          <td>14 יום לפני מועד המסירה</td>
+          <td><span class="date">14.09.2028</span></td>
+          <td><span class="pct">10%</span></td>
+          <td><span class="badge badge-red">50% מוצמד + מלוא ההפרשים מ-ג.א–ג.ה</span></td>
+          <td class="idx-pct-cell" id="bulk-pct-z"></td>
+          <td class="amount" id="bulk-base-z">₪111,112</td>
+          <td class="amount-idx" id="bulk-idx-z"></td>
+          <td class="amount-final" id="bulk-fin-z"></td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="4">סה"כ</td>
+          <td><span class="pct">100%</span></td>
+          <td></td><td></td>
+          <td class="amount" id="bulk-base-total">₪1,111,122</td>
+          <td class="amount-idx" id="bulk-total-idx"></td>
+          <td class="amount-final" id="bulk-total-fin"></td>
+        </tr>
+      </tbody>
+    </table>
+    <p id="bulk-footnote-z" style="color:#475569; font-size:0.78rem; margin-bottom:1.5rem;"></p>
+  </div>
+
+  <h2>טבלת תרחישי הצמדה — לוח רגיל בלבד</h2>
+  <div class="note-box">
+    <strong>השפעת לחצי המלחמה על תחזית המדד (מחושב ללוח 7 תשלומים — למצב תשלום מוקדם בחר "תשלום מוקדם" למעלה):</strong>
+    <ul>
+      <li><strong>שמרני (3.0%):</strong> המלחמה מסתיימת מוקדם, שוק העבודה מתאזן, חומרים מתייצבים</li>
+      <li><strong>בסיס (4.5%):</strong> המשך לחצי שכר ומחסור בעובדים, מחירי חומרים גבוהים — ממוצע 20 שנה + פרמיית מלחמה</li>
+      <li><strong>לחץ מלחמה (7.0%):</strong> המלחמה נמשכת, שיקום עצום, שכר בנייה ממשיך לזנק, ברזל/בטון נשארים גבוהים</li>
+    </ul>
+  </div>
+  <table id="scenario-table">
+    <thead>
+      <tr>
+        <th>תרחיש</th>
+        <th>שיעור שנתי</th>
+        <th>הצמדה — לוח רגיל</th>
+        <th>סה"כ — לוח רגיל</th>
+        <th>תוספת</th>
+        <th style="color:#a78bfa">הצמדה — תשלום מוקדם</th>
+        <th style="color:#a78bfa">סה"כ — תשלום מוקדם</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr data-rate="0.03" onclick="setScenario(document.querySelector('.scenario-btn.low'))" style="cursor:pointer">
+        <td><span class="badge badge-green">שמרני</span></td>
+        <td>3.0% / שנה</td>
+        <td class="amount-idx" id="scen-reg-idx-30">—</td>
+        <td class="amount-final" id="scen-reg-fin-30">—</td>
+        <td><span class="badge badge-gray" id="scen-pct-30">—</span></td>
+        <td class="amount-idx" style="color:#a78bfa" id="scen-bulk-idx-30">—</td>
+        <td class="amount-final" style="color:#a78bfa" id="scen-bulk-fin-30">—</td>
+      </tr>
+      <tr data-rate="0.045" class="active-scenario-row" onclick="setScenario(document.querySelector('.scenario-btn.mid'))" style="cursor:pointer">
+        <td><span class="badge badge-yellow">בסיס</span></td>
+        <td>4.5% / שנה</td>
+        <td class="amount-idx" id="scen-reg-idx-45">—</td>
+        <td class="amount-final" id="scen-reg-fin-45">—</td>
+        <td><span class="badge badge-yellow" id="scen-pct-45">—</span></td>
+        <td class="amount-idx" style="color:#a78bfa" id="scen-bulk-idx-45">—</td>
+        <td class="amount-final" style="color:#a78bfa" id="scen-bulk-fin-45">—</td>
+      </tr>
+      <tr data-rate="0.07" onclick="setScenario(document.querySelector('.scenario-btn.high'))" style="cursor:pointer">
+        <td><span class="badge badge-red">לחץ מלחמה</span></td>
+        <td>7.0% / שנה</td>
+        <td class="amount-idx" id="scen-reg-idx-70">—</td>
+        <td class="amount-final" id="scen-reg-fin-70">—</td>
+        <td><span class="badge badge-red" id="scen-pct-70">—</span></td>
+        <td class="amount-idx" style="color:#a78bfa" id="scen-bulk-idx-70">—</td>
+        <td class="amount-final" style="color:#a78bfa" id="scen-bulk-fin-70">—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr class="section-divider" />
+
+  <h2>כללי הצמדה למדד תשומות הבנייה (מדד)</h2>
+  <div class="note-box">
+    <strong>§4 — מנגנון ההצמדה:</strong>
+    <ul>
+      <li>20% הראשונים מהתמורה (תשלומים א׳ + ב׳) — <strong>פטורים לחלוטין מהצמדה</strong></li>
+      <li>מתשלום ג.א ואילך — <strong>50% בלבד</strong> מכל תשלום מוצמד למדד תשומות הבנייה; 50% נותר קבוע</li>
+      <li>תשלום ז׳ (יתרה לפני מסירה) — 50% מוצמד + <strong>כל הפרשי ההצמדה</strong> שנצברו מתשלומים ג.א–ג.ה</li>
+    </ul>
+  </div>
+  <div class="note-box">
+    <strong>§5 — חישוב ההפרש:</strong>
+    <ul>
+      <li>בסיס: מדד ידוע במועד חתימת החוזה</li>
+      <li>מדד חדש: מדד ידוע במועד ביצוע התשלום בפועל</li>
+      <li>הצמדה מוגבלת עד מועד המסירה החוזי — עיכוב שנגרם ע"י הקונה אינו מזכה בהצמדה נוספת</li>
+    </ul>
+  </div>
+  <div class="note-box">
+    <strong>§8 — הגדרת המדד:</strong>
+    <ul>
+      <li>מדד תשומות הבנייה כפי שמפרסמת הלשכה המרכזית לסטטיסטיקה</li>
+      <li>בהתאם לתיקון מס׳ 9 (2022) לחוק המכר (דירות)</li>
+    </ul>
+  </div>
+
+  <hr class="section-divider" />
+
+  <h2>הערות נוספות</h2>
+  <div class="note-box">
+    <strong>אופן ביצוע התשלומים:</strong>
+    <ul>
+      <li>כל התשלומים — <strong>באמצעות ספר שיקים בלבד</strong> שהנפיק הבנק המלווה (בנק לאומי, חשבון 187120, סניף 800)</li>
+      <li>תאריך ביצוע = תאריך הצגת השיק לבנק (לא תאריך המסירה למוכר)</li>
+      <li>תשלום שלא בוצע דרך ספר שיקים לא ייחשב כתשלום על חשבון המחיר ולא יזכה בערבות מכר</li>
+    </ul>
+  </div>
+  <div class="note-box">
+    <strong>איחור בתשלום (§10):</strong>
+    <ul>
+      <li>איחור של יותר מ-10 ימים — ריבית פיגורים לפי תקנות חוק המכר</li>
+    </ul>
+  </div>
+  <div class="note-box">
+    <strong>שכ"ט עורך דין מוכר:</strong>
+    <ul>
+      <li>משולם ישירות לעו"ד המוכר במעמד החתימה</li>
+      <li>הנמוך מבין: 0.5% ממחיר הדירה + מע"מ, או ₪5,915 + מע"מ</li>
+      <li>אינו חלק ממחיר הדירה (מחוץ ל-100%)</li>
+    </ul>
+  </div>
+
+  <hr class="section-divider" />
+  <p style="color:#475569; font-size:0.78rem;">עודכן: 14.04.2026 · מקור: 05 - Appendices Signed.pdf · סקירה ע"י Claude Code</p>
+
+  <script>
+    const G_MONTHS = [4, 9, 14, 19, 24];
+    const DELIVERY_MONTHS = 29;
+
+    let BASE_A, BASE_B, BASE_G, BASE_Z, UPFRONT;
+    let currentRate = 0.045;
+    let currentMode = 'regular';
+
+    function fmt(n) {
+      return '₪' + Math.round(n).toLocaleString('en-US');
+    }
+
+    function growth(r, months) {
+      return Math.pow(1 + r, months / 12) - 1;
+    }
+
+    // accumulated at ז = Σ[ BASE_G/2 × (growth_delivery - growth_gi) ]
+    // This is the DEFERRED indexation: the remaining index adjustment from each ג payment date to delivery.
+    function calcZ(r) {
+      const gd = growth(r, DELIVERY_MONTHS);
+      const zOwn = (BASE_Z / 2) * gd;
+      let accumulated = 0;
+      G_MONTHS.forEach(m => {
+        accumulated += (BASE_G / 2) * (gd - growth(r, m));
+      });
+      return { gd, zOwn, accumulated, total: zOwn + accumulated };
+    }
+
+    function handlePriceInput(value) {
+      const price = parseInt(String(value).replace(/[^0-9]/g, ''), 10);
+      if (!price || price < 100000) return;
+      updateBaseAmounts(price);
+      refreshAll();
+    }
+
+    function updateBaseAmounts(price) {
+      BASE_A = Math.round(price * 0.07);
+      BASE_B = Math.round(price * 0.13);
+      BASE_G = Math.round(price * 0.14);
+      // ז gets the remainder — ensures the sum equals price exactly regardless of rounding
+      BASE_Z = price - BASE_A - BASE_B - 5 * BASE_G;
+      UPFRONT = BASE_A + BASE_B + 5 * BASE_G;  // 90%
+
+      // Update static base-amount cells
+      const staticCells = {
+        'base-a': BASE_A, 'base-b': BASE_B,
+        'base-g1': BASE_G, 'base-g2': BASE_G, 'base-g3': BASE_G,
+        'base-g4': BASE_G, 'base-g5': BASE_G,
+        'base-z': BASE_Z, 'base-total': price,
+        'bulk-base': UPFRONT, 'bulk-fin-upfront': UPFRONT,
+        'bulk-base-z': BASE_Z, 'bulk-base-total': price
+      };
+      for (const [id, val] of Object.entries(staticCells)) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = fmt(val);
+      }
+
+      // א and ב have no indexation — their final = base
+      document.getElementById('fin-a').textContent = fmt(BASE_A);
+      document.getElementById('fin-b').textContent = fmt(BASE_B);
+
+      document.getElementById('upfront-display').textContent = fmt(UPFRONT);
+    }
+
+    function updateScenarioTable() {
+      const P = BASE_A + BASE_B + 5 * BASE_G + BASE_Z;
+      const indexedBase = BASE_Z / 2 + 5 * (BASE_G / 2);  // total indexed principal
+      [
+        { rate: 0.03,  suffix: '30' },
+        { rate: 0.045, suffix: '45' },
+        { rate: 0.07,  suffix: '70' }
+      ].forEach(({ rate, suffix }) => {
+        const gd = growth(rate, DELIVERY_MONTHS);
+        const regIdx   = gd * indexedBase;
+        const regTotal = P + regIdx;
+        const bulkIdx  = (BASE_Z / 2) * gd;
+        const bulkTotal = UPFRONT + BASE_Z + bulkIdx;
+        const pctStr   = '+' + (regIdx / P * 100).toFixed(1) + '%';
+
+        document.getElementById('scen-reg-idx-'  + suffix).textContent = fmt(regIdx);
+        document.getElementById('scen-reg-fin-'  + suffix).textContent = fmt(regTotal);
+        document.getElementById('scen-pct-'      + suffix).textContent = pctStr;
+        document.getElementById('scen-bulk-idx-' + suffix).textContent = fmt(bulkIdx);
+        document.getElementById('scen-bulk-fin-' + suffix).textContent = fmt(bulkTotal);
+      });
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      if (mode === 'regular') {
+        document.querySelector('.mode-btn:not(.bulk)').classList.add('active');
+        document.getElementById('payment-table').style.display = '';
+        document.getElementById('footnote-z').style.display = '';
+        document.getElementById('bulk-section').style.display = 'none';
+      } else {
+        document.querySelector('.mode-btn.bulk').classList.add('active');
+        document.getElementById('payment-table').style.display = 'none';
+        document.getElementById('footnote-z').style.display = 'none';
+        document.getElementById('bulk-section').style.display = 'block';
+      }
+      refreshAll();
+    }
+
+    function setScenario(btn) {
+      document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentRate = parseFloat(btn.dataset.rate);
+      refreshAll();
+    }
+
+    function refreshAll() {
+      const r = currentRate;
+      const z = calcZ(r);
+
+      // --- Regular table ---
+      G_MONTHS.forEach((m, i) => {
+        const g = growth(r, m);
+        const idxAmt = (BASE_G / 2) * g;
+        const n = i + 1;
+        document.getElementById('pct-g' + n).textContent = (g * 100).toFixed(1) + '%';
+        document.getElementById('idx-g' + n).textContent = fmt(idxAmt);
+        document.getElementById('fin-g' + n).textContent = fmt(BASE_G + idxAmt);
+      });
+
+      document.getElementById('pct-z').innerHTML = (z.gd * 100).toFixed(1) + '%&thinsp;*';
+      document.getElementById('idx-z').textContent = fmt(z.total) + ' *';
+      document.getElementById('fin-z').textContent = fmt(BASE_Z + z.total);
+
+      const totalIdx = G_MONTHS.reduce((s, m) => s + (BASE_G / 2) * growth(r, m), 0) + z.total;
+      const totalFin = BASE_A + BASE_B + 5 * BASE_G + BASE_Z + totalIdx;
+      document.getElementById('total-idx').textContent = fmt(totalIdx);
+      document.getElementById('total-fin').textContent = fmt(totalFin);
+
+      document.getElementById('footnote-z').textContent =
+        '* תשלום ז: ' + fmt(z.zOwn) +
+        ' הצמדה ישירה (50% מז׳ × ' + (z.gd * 100).toFixed(1) + '%) + ' +
+        fmt(z.accumulated) +
+        ' הפרשי הצמדה שנדחו מתשלומי ג.א–ג.ה (מה שנשאר לאחר ניכוי ההצמדה ששולמה בכל תשלום ג)';
+
+      // --- Bulk table ---
+      const bulkZIdx = (BASE_Z / 2) * z.gd;
+      const bulkZFin = BASE_Z + bulkZIdx;
+      const bulkTotal = UPFRONT + bulkZFin;
+      const regularTotal = totalFin;
+      const saving = regularTotal - bulkTotal;
+
+      document.getElementById('bulk-pct-z').innerHTML = (z.gd * 100).toFixed(1) + '%';
+      document.getElementById('bulk-idx-z').textContent = fmt(bulkZIdx);
+      document.getElementById('bulk-fin-z').textContent = fmt(bulkZFin);
+      document.getElementById('bulk-total-idx').textContent = fmt(bulkZIdx);
+      document.getElementById('bulk-total-fin').textContent = fmt(bulkTotal);
+
+      document.getElementById('bulk-footnote-z').textContent =
+        '* הצמדה חלה על 50% מתשלום ז׳ בלבד (' + fmt(BASE_Z / 2) +
+        ' × ' + (z.gd * 100).toFixed(1) + '% = ' + fmt(bulkZIdx) +
+        '). לא חלה הצמדה על תשלומי ג.א–ג.ה — שכן שולמו במלואם ביום החתימה.';
+
+      document.getElementById('bulk-compare').innerHTML =
+        '<strong>חיסכון ביחס ללוח הרגיל (' + (r * 100).toFixed(1) + '%/שנה):</strong> ' +
+        'לוח רגיל → ' + fmt(regularTotal) +
+        ' | תשלום מוקדם → ' + fmt(bulkTotal) +
+        ' | <strong style="color:#34d399">חיסכון: ' + fmt(saving) + '</strong>' +
+        ' (= הצמדה שנחסכה על 50% מתשלומי ג.א–ג.ה × ' + (z.gd * 100).toFixed(1) + '% = ' +
+        fmt(5 * (BASE_G / 2)) + ' × ' + (z.gd * 100).toFixed(1) + '%).';
+
+      // Highlight active scenario row
+      document.querySelectorAll('#scenario-table tbody tr').forEach(tr => {
+        tr.classList.toggle('active-scenario-row', parseFloat(tr.dataset.rate) === r);
+      });
+
+      // Update all three scenario rows
+      updateScenarioTable();
+    }
+
+    // Initialize with default price
+    updateBaseAmounts(1111122);
+    setScenario(document.querySelector('.scenario-btn.mid'));
+  </script>
+
+</body>
+</html>

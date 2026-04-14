@@ -109,19 +109,28 @@
     .bulk-highlight td { background: #1a1040; }
     .compare-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 0.85rem 1.25rem; margin-bottom: 1.5rem; font-size: 0.83rem; color: #94a3b8; }
     .compare-box strong { color: #e2e8f0; }
-    /* Price input */
-    .price-input-box {
+    /* Inputs box */
+    .inputs-box {
       background: #1e293b;
       border: 1px solid #334155;
       border-radius: 8px;
       padding: 1rem 1.25rem;
       margin-bottom: 1.5rem;
       display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .inputs-row {
+      display: flex;
       align-items: center;
-      gap: 1.5rem;
+      gap: 1.25rem;
       flex-wrap: wrap;
     }
-    .price-input-label { color: #94a3b8; font-size: 0.9rem; white-space: nowrap; font-weight: 600; }
+    .inputs-row + .inputs-row {
+      padding-top: 0.65rem;
+      border-top: 1px solid #334155;
+    }
+    .input-label { color: #94a3b8; font-size: 0.88rem; white-space: nowrap; }
     .price-input-wrap {
       display: flex;
       align-items: center;
@@ -152,6 +161,20 @@
     #price-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
     .price-upfront { color: #64748b; font-size: 0.85rem; white-space: nowrap; }
     .price-upfront strong { color: #7dd3fc; font-variant-numeric: tabular-nums; }
+    input[type="date"] {
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      color: #f8fafc;
+      padding: 0.38rem 0.65rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      cursor: pointer;
+      color-scheme: dark;
+      transition: border-color 0.15s;
+    }
+    input[type="date"]:focus { border-color: #7dd3fc; }
   </style>
 </head>
 <body>
@@ -160,22 +183,30 @@
   <p class="subtitle">מקור: נספח א׳ לחוזה המכר — "פרטי הדירה, המחיר ותנאי התשלום (הצמדה למדד תשומות הבנייה)"</p>
   <span class="source-tag">05 - Appendices Signed.pdf · עמ׳ 2–4</span>
 
-  <div class="price-input-box">
-    <span class="price-input-label">מחיר הדירה:</span>
-    <div class="price-input-wrap">
-      <span class="price-sym">₪</span>
-      <input type="number" id="price-input"
-             value="1000000" min="100000" max="10000000" step="1000"
-             oninput="handlePriceInput(this.value)" />
+  <div class="inputs-box">
+    <div class="inputs-row">
+      <span class="input-label">מחיר הדירה:</span>
+      <div class="price-input-wrap">
+        <span class="price-sym">₪</span>
+        <input type="number" id="price-input"
+               value="1000000" min="100000" max="10000000" step="1000"
+               oninput="handlePriceInput(this.value)" />
+      </div>
+      <span class="price-upfront">90% בחתימה: <strong id="upfront-display">₪1,000,010</strong> (10% נותרים משולמים בקבלת מפתח)</span>
     </div>
-    <span class="price-upfront">90% בחתימה: <strong id="upfront-display">₪1,000,010</strong> (10% נותרים משולמים בקבלת מפתח)</span>
+    <div class="inputs-row">
+      <span class="input-label">תאריך חתימה:</span>
+      <input type="date" id="signing-date-input" value="2026-04-13" oninput="handleDateInput()" />
+      <span class="input-label">תאריך מסירה:</span>
+      <input type="date" id="delivery-date-input" value="2028-09-28" oninput="handleDateInput()" />
+    </div>
   </div>
 
   <div class="note-box">
     <strong>הנחות לחישוב תאריכים:</strong>
     <ul>
-      <li>תאריך חתימה: <strong>13.04.2026</strong></li>
-      <li>תאריך מסירה חוזי: <strong>28.09.2028</strong></li>
+      <li>תאריך חתימה: <strong id="nb-signing-date">13.04.2026</strong></li>
+      <li>תאריך מסירה חוזי: <strong id="nb-delivery-date">28.09.2028</strong></li>
       <li>כל התשלומים מחושבים לפי חודשים מתאריך החתימה (לא לפי אבני דרך בנייה)</li>
     </ul>
   </div>
@@ -225,7 +256,7 @@
         <td><span class="label-id">א</span></td>
         <td>חתימה על החוזה</td>
         <td>במעמד החתימה (שיק)</td>
-        <td><span class="date">13.04.2026</span></td>
+        <td><span class="date" id="date-sign">13.04.2026</span></td>
         <td><span class="pct">7%</span></td>
         <td><span class="badge badge-green">ללא הצמדה</span></td>
         <td class="idx-zero">—</td>
@@ -237,7 +268,7 @@
         <td><span class="label-id">ב</span></td>
         <td>השלמה ל-20% מהתמורה</td>
         <td>תוך 45 יום מהחתימה</td>
-        <td><span class="date">28.05.2026</span></td>
+        <td><span class="date" id="date-b">28.05.2026</span></td>
         <td><span class="pct">13%</span></td>
         <td><span class="badge badge-green">ללא הצמדה</span></td>
         <td class="idx-zero">—</td>
@@ -249,7 +280,7 @@
         <td><span class="label-id">ג.א</span></td>
         <td>תשלום 1 מתוך 5</td>
         <td>חודש 4 מהחתימה</td>
-        <td><span class="date">13.08.2026</span></td>
+        <td><span class="date" id="date-g1">13.08.2026</span></td>
         <td><span class="pct">14%</span></td>
         <td><span class="badge badge-yellow">50% מוצמד</span></td>
         <td class="idx-pct-cell" id="pct-g1"></td>
@@ -261,7 +292,7 @@
         <td><span class="label-id">ג.ב</span></td>
         <td>תשלום 2 מתוך 5</td>
         <td>חודש 9 מהחתימה</td>
-        <td><span class="date">13.01.2027</span></td>
+        <td><span class="date" id="date-g2">13.01.2027</span></td>
         <td><span class="pct">14%</span></td>
         <td><span class="badge badge-yellow">50% מוצמד</span></td>
         <td class="idx-pct-cell" id="pct-g2"></td>
@@ -273,7 +304,7 @@
         <td><span class="label-id">ג.ג</span></td>
         <td>תשלום 3 מתוך 5</td>
         <td>חודש 14 מהחתימה</td>
-        <td><span class="date">13.06.2027</span></td>
+        <td><span class="date" id="date-g3">13.06.2027</span></td>
         <td><span class="pct">14%</span></td>
         <td><span class="badge badge-yellow">50% מוצמד</span></td>
         <td class="idx-pct-cell" id="pct-g3"></td>
@@ -285,7 +316,7 @@
         <td><span class="label-id">ג.ד</span></td>
         <td>תשלום 4 מתוך 5</td>
         <td>חודש 19 מהחתימה</td>
-        <td><span class="date">13.11.2027</span></td>
+        <td><span class="date" id="date-g4">13.11.2027</span></td>
         <td><span class="pct">14%</span></td>
         <td><span class="badge badge-yellow">50% מוצמד</span></td>
         <td class="idx-pct-cell" id="pct-g4"></td>
@@ -297,7 +328,7 @@
         <td><span class="label-id">ג.ה</span></td>
         <td>תשלום 5 מתוך 5</td>
         <td>חודש 24 מהחתימה</td>
-        <td><span class="date">13.04.2028</span></td>
+        <td><span class="date" id="date-g5">13.04.2028</span></td>
         <td><span class="pct">14%</span></td>
         <td><span class="badge badge-yellow">50% מוצמד</span></td>
         <td class="idx-pct-cell" id="pct-g5"></td>
@@ -309,7 +340,7 @@
         <td><span class="label-id">ז</span></td>
         <td>יתרת התמורה — לפני מסירה</td>
         <td>14 יום לפני מועד המסירה</td>
-        <td><span class="date">14.09.2028</span></td>
+        <td><span class="date" id="date-z">14.09.2028</span></td>
         <td><span class="pct">10%</span></td>
         <td><span class="badge badge-red">50% מוצמד + כל הפרשי הצמדה שנצברו</span></td>
         <td class="idx-pct-cell" id="pct-z"></td>
@@ -352,7 +383,7 @@
           <td><span class="label-id">א–ג.ה</span></td>
           <td>תשלום מוקדם (א׳+ב׳+ג.א–ג.ה)</td>
           <td>במעמד החתימה</td>
-          <td><span class="date">13.04.2026</span></td>
+          <td><span class="date" id="date-bulk-sign">13.04.2026</span></td>
           <td><span class="pct">90%</span></td>
           <td><span class="badge badge-green">ללא הצמדה</span></td>
           <td class="idx-zero">—</td>
@@ -364,7 +395,7 @@
           <td><span class="label-id">ז</span></td>
           <td>יתרת התמורה + כל ההצמדה שנצברה</td>
           <td>14 יום לפני מועד המסירה</td>
-          <td><span class="date">14.09.2028</span></td>
+          <td><span class="date" id="date-bulk-z">14.09.2028</span></td>
           <td><span class="pct">10%</span></td>
           <td><span class="badge badge-red">50% מוצמד + מלוא ההפרשים מ-ג.א–ג.ה</span></td>
           <td class="idx-pct-cell" id="bulk-pct-z"></td>
@@ -495,11 +526,35 @@
 
   <script>
     const G_MONTHS = [4, 9, 14, 19, 24];
-    const DELIVERY_MONTHS = 29;
 
     let BASE_A, BASE_B, BASE_G, BASE_Z, UPFRONT;
     let currentRate = 0.045;
     let currentMode = 'regular';
+    let signingDate  = new Date(2026, 3, 13);   // 13.04.2026
+    let deliveryDate = new Date(2028, 8, 28);   // 28.09.2028
+
+    // --- Date helpers ---
+
+    function fmtDate(d) {
+      return String(d.getDate()).padStart(2,'0') + '.' +
+             String(d.getMonth() + 1).padStart(2,'0') + '.' +
+             d.getFullYear();
+    }
+
+    function addDays(d, n) {
+      const r = new Date(d); r.setDate(r.getDate() + n); return r;
+    }
+
+    function addMonths(d, n) {
+      const r = new Date(d); r.setMonth(r.getMonth() + n); return r;
+    }
+
+    // Fractional months from signing to delivery — used for indexation calculations
+    function getDeliveryMonths() {
+      return (deliveryDate - signingDate) / (365.25 / 12 * 24 * 60 * 60 * 1000);
+    }
+
+    // --- Amount helpers ---
 
     function fmt(n) {
       return '₪' + Math.round(n).toLocaleString('en-US');
@@ -509,10 +564,9 @@
       return Math.pow(1 + r, months / 12) - 1;
     }
 
-    // accumulated at ז = Σ[ BASE_G/2 × (growth_delivery - growth_gi) ]
-    // This is the DEFERRED indexation: the remaining index adjustment from each ג payment date to delivery.
     function calcZ(r) {
-      const gd = growth(r, DELIVERY_MONTHS);
+      const dm  = getDeliveryMonths();
+      const gd  = growth(r, dm);
       const zOwn = (BASE_Z / 2) * gd;
       let accumulated = 0;
       G_MONTHS.forEach(m => {
@@ -521,6 +575,8 @@
       return { gd, zOwn, accumulated, total: zOwn + accumulated };
     }
 
+    // --- Input handlers ---
+
     function handlePriceInput(value) {
       const price = parseInt(String(value).replace(/[^0-9]/g, ''), 10);
       if (!price || price < 100000) return;
@@ -528,15 +584,25 @@
       refreshAll();
     }
 
+    function handleDateInput() {
+      const sVal = document.getElementById('signing-date-input').value;
+      const dVal = document.getElementById('delivery-date-input').value;
+      if (sVal) signingDate  = new Date(sVal + 'T00:00:00');
+      if (dVal) deliveryDate = new Date(dVal + 'T00:00:00');
+      if (deliveryDate <= signingDate) return;
+      updateDates();
+      refreshAll();
+    }
+
+    // --- DOM updaters ---
+
     function updateBaseAmounts(price) {
       BASE_A = Math.round(price * 0.07);
       BASE_B = Math.round(price * 0.13);
       BASE_G = Math.round(price * 0.14);
-      // ז gets the remainder — ensures the sum equals price exactly regardless of rounding
       BASE_Z = price - BASE_A - BASE_B - 5 * BASE_G;
-      UPFRONT = BASE_A + BASE_B + 5 * BASE_G;  // 90%
+      UPFRONT = BASE_A + BASE_B + 5 * BASE_G;
 
-      // Update static base-amount cells
       const staticCells = {
         'base-a': BASE_A, 'base-b': BASE_B,
         'base-g1': BASE_G, 'base-g2': BASE_G, 'base-g3': BASE_G,
@@ -549,28 +615,48 @@
         const el = document.getElementById(id);
         if (el) el.textContent = fmt(val);
       }
-
-      // א and ב have no indexation — their final = base
       document.getElementById('fin-a').textContent = fmt(BASE_A);
       document.getElementById('fin-b').textContent = fmt(BASE_B);
-
       document.getElementById('upfront-display').textContent = fmt(UPFRONT);
+    }
+
+    function updateDates() {
+      const zDate = addDays(deliveryDate, -14);
+      const dateMap = {
+        'date-sign':      signingDate,
+        'date-bulk-sign': signingDate,
+        'date-b':         addDays(signingDate, 45),
+        'date-g1':        addMonths(signingDate, 4),
+        'date-g2':        addMonths(signingDate, 9),
+        'date-g3':        addMonths(signingDate, 14),
+        'date-g4':        addMonths(signingDate, 19),
+        'date-g5':        addMonths(signingDate, 24),
+        'date-z':         zDate,
+        'date-bulk-z':    zDate,
+      };
+      for (const [id, d] of Object.entries(dateMap)) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = fmtDate(d);
+      }
+      document.getElementById('nb-signing-date').textContent  = fmtDate(signingDate);
+      document.getElementById('nb-delivery-date').textContent = fmtDate(deliveryDate);
     }
 
     function updateScenarioTable() {
       const P = BASE_A + BASE_B + 5 * BASE_G + BASE_Z;
-      const indexedBase = BASE_Z / 2 + 5 * (BASE_G / 2);  // total indexed principal
+      const indexedBase = BASE_Z / 2 + 5 * (BASE_G / 2);
       [
         { rate: 0.03,  suffix: '30' },
         { rate: 0.045, suffix: '45' },
         { rate: 0.07,  suffix: '70' }
       ].forEach(({ rate, suffix }) => {
-        const gd = growth(rate, DELIVERY_MONTHS);
-        const regIdx   = gd * indexedBase;
-        const regTotal = P + regIdx;
-        const bulkIdx  = (BASE_Z / 2) * gd;
+        const dm = getDeliveryMonths();
+        const gd = growth(rate, dm);
+        const regIdx    = gd * indexedBase;
+        const regTotal  = P + regIdx;
+        const bulkIdx   = (BASE_Z / 2) * gd;
         const bulkTotal = UPFRONT + BASE_Z + bulkIdx;
-        const pctStr   = '+' + (regIdx / P * 100).toFixed(1) + '%';
+        const pctStr    = '+' + (regIdx / P * 100).toFixed(1) + '%';
 
         document.getElementById('scen-reg-idx-'  + suffix).textContent = fmt(regIdx);
         document.getElementById('scen-reg-fin-'  + suffix).textContent = fmt(regTotal);
@@ -634,11 +720,10 @@
         ' הפרשי הצמדה שנדחו מתשלומי ג.א–ג.ה (מה שנשאר לאחר ניכוי ההצמדה ששולמה בכל תשלום ג)';
 
       // --- Bulk table ---
-      const bulkZIdx = (BASE_Z / 2) * z.gd;
-      const bulkZFin = BASE_Z + bulkZIdx;
+      const bulkZIdx  = (BASE_Z / 2) * z.gd;
+      const bulkZFin  = BASE_Z + bulkZIdx;
       const bulkTotal = UPFRONT + bulkZFin;
-      const regularTotal = totalFin;
-      const saving = regularTotal - bulkTotal;
+      const saving    = totalFin - bulkTotal;
 
       document.getElementById('bulk-pct-z').innerHTML = (z.gd * 100).toFixed(1) + '%';
       document.getElementById('bulk-idx-z').textContent = fmt(bulkZIdx);
@@ -653,7 +738,7 @@
 
       document.getElementById('bulk-compare').innerHTML =
         '<strong>חיסכון ביחס ללוח הרגיל (' + (r * 100).toFixed(1) + '%/שנה):</strong> ' +
-        'לוח רגיל → ' + fmt(regularTotal) +
+        'לוח רגיל → ' + fmt(totalFin) +
         ' | תשלום מוקדם → ' + fmt(bulkTotal) +
         ' | <strong style="color:#34d399">חיסכון: ' + fmt(saving) + '</strong>' +
         ' (= הצמדה שנחסכה על 50% מתשלומי ג.א–ג.ה × ' + (z.gd * 100).toFixed(1) + '% = ' +
@@ -664,12 +749,12 @@
         tr.classList.toggle('active-scenario-row', parseFloat(tr.dataset.rate) === r);
       });
 
-      // Update all three scenario rows
       updateScenarioTable();
     }
 
-    // Initialize with default price
+    // Initialize
     updateBaseAmounts(1000000);
+    updateDates();
     setScenario(document.querySelector('.scenario-btn.mid'));
   </script>
 
